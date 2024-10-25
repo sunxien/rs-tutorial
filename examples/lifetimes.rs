@@ -1,6 +1,6 @@
 #[cfg(test)]
 pub mod lifetimes_test_cases {
-    ///
+    /// what is `<'_>` ?
     #[test]
     pub fn test_lifetimes1() {
         println!()
