@@ -80,7 +80,8 @@ pub mod conditions_test_cases {
         println!("[test_while] run finished!!!")
     }
 
-    /// match
+    /// match, matches!()
+    /// Rust Doc: https://course.rs/basic/match-pattern/match-if-let.html
     #[test]
     pub fn test_match() {
         enum Color {
