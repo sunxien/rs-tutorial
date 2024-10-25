@@ -85,8 +85,18 @@ pub mod conditions_test_cases {
     }
 
     /// if let
+    /// Same as MATCH pattern { ... }
+    /// See also to `if-let chains` with eRFC-2947
     #[test]
     pub fn test_if_let() {
+        let tup = ("Pony", "Jack");
+        if let ("Pony", v) = tup {
+            println!("[test_if_let] if let v: {:?}", v);
+        } else if let ("Jack", v) = tup {
+            println!("[test_if_let] else if let v: {:?}", v);
+        } else {
+            println!("[test_if_let] else missing branch");
+        }
         println!()
     }
 }
