@@ -16,15 +16,66 @@ pub mod conditions_test_cases {
 
 
     /// for
+    /// Rust Docs: https://course.rs/basic/flow-control.html
     #[test]
     pub fn test_for() {
-        println!()
+        for i in 1..=10 {
+            if i == 4 {
+                continue;
+            }
+            if i > 8 {
+                break;
+            }
+            println!("[test_for] value: {:?}", i);
+        }
+
+        let vec = vec![1, 2, 3, 4, 5];
+        /// ownership is moving into the `for` loop. use `&vec` instead
+        /// Same as `for v in IntoIterator::into_iter(vec)`
+        for v in &vec {
+            println!("[test_for] value: {:?}", v);
+        }
+        println!("[test_for] value: {:?}", vec.len()); // compile error if not use `&vec`
+
+        for (i, v) in vec.iter().enumerate() {
+            println!("[test_for] vec[{:?}]: {:?}", i, v);
+        }
+        println!("[test_for] value: {:?}", vec.len()); // compile Passed!!!
     }
 
-    /// iterator
+    /// loop
+    /// `loop` is an expression, so it can return a result.
     #[test]
-    pub fn test_iterator() {
-        println!()
+    pub fn test_loop() {
+        let mut n = 5;
+        loop {
+            if n < 0 {
+                break;
+            }
+            println!("[test_loop] run {:?} times....", n);
+            n = n - 1;
+        }
+        println!("[test_loop] run finished!!!");
+
+        let mut m = 0;
+        let result = loop {
+            m = m + 1;
+            if (m > 10) {
+                break m; // `break` can return a result
+            }
+        };
+        println!("[test_loop] final result is {:?}", result);
+    }
+
+    /// while
+    #[test]
+    pub fn test_while() {
+        let mut n = 5;
+        while n > -1 {
+            println!("[test_while] run {:?} times....", n);
+            n = n - 1;
+        }
+        println!("[test_while] run finished!!!")
     }
 
     /// match
@@ -38,8 +89,6 @@ pub mod conditions_test_cases {
     pub fn test_if_let() {
         println!()
     }
-
-    // TODO Notice: while semantics is unsupported in Rust.
 }
 
 /// No `main` function found in crate `conditions` [EO601]
