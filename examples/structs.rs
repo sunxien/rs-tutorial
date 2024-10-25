@@ -14,8 +14,18 @@ impl Employee<'_> {
     }
 }
 
-fn main() {
-    let emp = Employee::new(121001, "xien.sxe");
-    let to_string = emp.to_string();
-    println!("{:?}", to_string);
+///
+#[cfg(test)]
+pub mod structs_test_cases {
+    use crate::Employee;
+
+    #[test]
+    pub fn test_structs1() {
+        let emp = Employee::new(121001, "xien.sxe");
+        let to_string = emp.to_string();
+        println!("{:?}", to_string);
+    }
 }
+
+/// No `main` function found in crate `structs` [EO601]
+fn main() {}
