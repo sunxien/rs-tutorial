@@ -1,5 +1,7 @@
 #[cfg(test)]
 pub mod conditions_test_cases {
+    use rand::random;
+
     /// if
     #[test]
     pub fn test_if() {
@@ -81,7 +83,27 @@ pub mod conditions_test_cases {
     /// match
     #[test]
     pub fn test_match() {
-        println!()
+        enum Color {
+            StrDesc(String), // "green"
+            RgbCode(u16, u16, u16), // 248,248,255
+            HexCode(String), // "#000000"
+        }
+        let colors = [
+            Color::StrDesc(String::from("green")),
+            Color::RgbCode(248, 248, 255),
+            Color::HexCode(String::from("#000000"))
+        ];
+        let len = colors.len();
+        for i in 1..=5 {
+            let rand: usize = random();
+            let color = match &colors[rand % len] {
+                Color::StrDesc(desc) => "desc",
+                Color::RgbCode(r, g, b) => "rgb",
+                Color::HexCode(code) => "hex",
+                _ => "unknown"
+            };
+            println!("Congratulations!!! Color indicates by: {:?}", color);
+        }
     }
 
     /// if let
@@ -97,7 +119,16 @@ pub mod conditions_test_cases {
         } else {
             println!("[test_if_let] else missing branch");
         }
-        println!()
+
+        enum E {
+            X(u8),
+            Y(u8),
+            Z(u8),
+        }
+        let v = E::X(12);
+        if let E::X(n) | E::Y(n) = v {
+            assert_eq!(n, 12);
+        }
     }
 }
 
