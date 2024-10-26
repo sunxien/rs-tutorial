@@ -1,6 +1,8 @@
 #[cfg(test)]
 pub mod lifetimes_test_cases {
-    /// what is `<'_>` ?
+
+    /// Lifetime is only used for reference.
+    /// `<'a>`, `<'static>`, and what is `<'_>` ?
     #[test]
     pub fn test_lifetimes1() {
         println!()
