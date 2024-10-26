@@ -101,11 +101,11 @@ pub mod traits_test_cases {
     /// From trait
     #[test]
     pub fn test_from_trait() {
-        // TODO 
+        // TODO
         println!();
     }
 
-    // Fn, FnOnce
+    // Fn, FnOnce, dyn trait lifetime
 }
 
 
