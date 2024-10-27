@@ -257,8 +257,23 @@ pub mod traits_test_cases {
         }
     }
 
-    // Fn, FnMut, FnOnce,
-    // dyn trait lifetime
+    ///
+    #[test]
+    pub fn test_drop() {
+        let emp = Employee { emp_id: 121001, emp_name: "xien.sxe" };
+        println!("{:?}", emp);
+
+        let a = 1i32;
+        let b = 2u64;
+        let sum = a as u64 + b;
+        println!("{:?} + {:?} = {:?}...Employee object has been dropped", a, b, sum);
+    }
+
+    impl Drop for Employee<'_> {
+        fn drop(&mut self) {
+            println!("drop employee object now....");
+        }
+    }
 }
 
 
