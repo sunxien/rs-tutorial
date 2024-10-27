@@ -24,8 +24,12 @@ rust-csv = "0.1.0"
 criterion = "0.5.1"
 sqlx = "0.8.2" # sql client
 redis_rs = "0.9.0" # redis client
+rayon = "1.10.0" # for CPU task
+tokio = "1.41.0" # async lib for IO task
 tokio-tungstenite = "0.24.0" # websocket
 tonic = "0.12.3" # gRPC lib
+rocket = "0.5.1"
+futures = { version = "0.3.31", features = ["thread-pool"] } # web server
 
 
 [profile.dev]
