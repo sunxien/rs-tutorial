@@ -49,7 +49,7 @@ const RESULT: usize = add(5, 10);
 #[cfg(test)]
 #[allow(unused, dead_code)]
 pub mod generic_types_test_cases {
-    use crate::{print, Wrapper};
+    use crate::{max_value, Wrapper};
 
     ///
     #[test]
@@ -65,7 +65,7 @@ pub mod generic_types_test_cases {
     #[test]
     pub fn test_generic_types2() {
         let arr = [1, 2, 3, 4, 5];
-        let max = print(&arr);
+        let max = max_value(&arr);
         println!("{:?}", max);
     }
 }

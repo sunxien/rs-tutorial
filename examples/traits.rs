@@ -24,6 +24,28 @@ struct SystemError<'a> {
     message: &'a str,
 }
 
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+struct Weibo {
+    username: String,
+}
+impl Summary for Weibo {
+    fn summarize(&self) -> String {
+        format!("this is weibo... username: {}", self.username)
+    }
+}
+
+struct Post {
+    author: String,
+}
+impl Summary for Post {
+    fn summarize(&self) -> String {
+        format!("this is post... author: {}", self.author)
+    }
+}
+
 #[cfg(test)]
 #[allow(unused, dead_code)]
 pub mod traits_test_cases {
