@@ -13,14 +13,20 @@ harness = false
 
 [dependencies]
 rand = "0.8.5"
-log = "0.4.22"
-tracing = "0.1.40"
+log = "0.4.22" # log api
+env_logger = "0.11.5" # log impl
+tracing = "0.1.40" # tracing
 tracing-subscriber = "0.3.18"
 tracing-appender = "0.2.3"
 serde = { version = "1.0.213", features = ["derive"] }
-serde_json = "1.0.132"
-env_logger = "0.11.5"
+serde_json = "1.0.132" # json lib
+rust-csv = "0.1.0"
 criterion = "0.5.1"
+sqlx = "0.8.2" # sql client
+redis_rs = "0.9.0" # redis client
+tokio-tungstenite = "0.24.0" # websocket
+tonic = "0.12.3" # gRPC lib
+
 
 [profile.dev]
 opt-level = 0
