@@ -27,6 +27,7 @@ struct SystemError<'a> {
 #[cfg(test)]
 #[allow(unused, dead_code)]
 pub mod traits_test_cases {
+    use std::cmp::Ordering;
     use std::error::Error;
     use std::fmt::{Debug, Display, Formatter};
     use serde::Serialize;
@@ -105,7 +106,159 @@ pub mod traits_test_cases {
         println!();
     }
 
-    // Fn, FnOnce, dyn trait lifetime
+    /// Trait `Eq` and `PartialEq`
+    #[test]
+    pub fn test_eq_and_partial_eq() {
+        // float number is not implement `eq` trait as a special value `NaN`
+        // The `NaN` can not be equals with each other!!!
+        // Compile error: Trait `Eq` is not implemented for `f32` [E0277]
+        // is_eq(3.14f32, 3.14f32);
+        is_partial_eq(3.14f32, 3.14f32);
+    }
+
+    /// Trait `Eq`
+    /// Example: fn is_eq<T: Eq + Debug>(a: T, b: T) {
+    fn is_eq<T>(a: T, b: T)
+    where
+        T: Eq + Debug,
+    {
+        if a == b {
+            println!("{:?} equals with {:?}? true", a, b)
+        }
+    }
+    /// Trait `PartialEq`
+    /// Example: fn is_partial_eq<T: PartialEq + Debug>(a: T, b: T) {
+    fn is_partial_eq<T>(a: T, b: T)
+    where
+        T: PartialEq + Debug,
+    {
+        if a == b {
+            println!("{:?} partial equals with {:?}? true", a, b)
+        }
+    }
+
+    /// Trait `Add`
+    #[test]
+    pub fn test_add() {}
+
+    /// Trait `Ord` and `PartialOrd`
+    #[test]
+    pub fn test_ord_and_partial_ord() {
+        let mut floats = vec![3.0f32, 3.25f32, 3.5f32, 3.75f32, 4.0f32];
+        // Compile error: Trait `Ord` is not implemented for `f32` [E0277]
+        // floats.sort();
+
+        let mut ints = vec![3, 4, 5, 6, 7];
+        let r = ints.sort();
+        for (i, v) in ints.iter().enumerate() {
+            println!("vecs[{:?}]={:?}", i, v);
+        }
+
+        let mut s1 = Student::new(100001, "jack".to_string(), 98);
+        let mut s2 = Student::new(100002, "pony".to_string(), 94);
+        let mut s3 = Student::new(100003, "robin".to_string(), 99);
+        let mut students = vec![s2, s1, s3];
+        students.sort();
+        for (i, v) in students.iter().enumerate() {
+            println!("vecs[{:?}]={:?}", i, v);
+        }
+    }
+
+    // #[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
+    #[derive(Debug)]
+    struct Student {
+        id: u32,
+        name: String,
+        score: u16,
+    }
+
+    #[allow(dead_code, unused)]
+    impl Student {
+        pub fn new(id: u32, name: String, score: u16) -> Self {
+            Self { id, name, score }
+        }
+    }
+
+    impl Eq for Student {}
+
+    impl PartialEq for Student {
+        fn eq(&self, other: &Self) -> bool {
+            self.id == other.id
+        }
+
+        fn ne(&self, other: &Self) -> bool {
+            self.id != other.id
+        }
+    }
+
+    impl Ord for Student {
+        fn cmp(&self, other: &Self) -> Ordering {
+            if self.score > other.score {
+                Ordering::Greater
+            } else if self.score < other.score {
+                Ordering::Less
+            } else {
+                Ordering::Equal
+            }
+        }
+
+        fn max(self, other: Self) -> Self
+        where
+            Self: Sized,
+        {
+            if self.score > other.score {
+                self
+            } else if self.score < other.score {
+                other
+            } else {
+                self
+            }
+        }
+
+        fn min(self, other: Self) -> Self
+        where
+            Self: Sized,
+        {
+            if self.score < other.score {
+                self
+            } else if self.score > other.score {
+                other
+            } else {
+                self
+            }
+        }
+    }
+
+    impl PartialOrd for Student {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            if self.score > other.score {
+                Option::Some(Ordering::Greater)
+            } else if self.score < other.score {
+                Option::Some(Ordering::Less)
+            } else {
+                Option::Some(Ordering::Equal)
+            }
+        }
+
+        fn lt(&self, other: &Self) -> bool {
+            self.score < other.score
+        }
+
+        fn le(&self, other: &Self) -> bool {
+            self.score <= other.score
+        }
+
+        fn gt(&self, other: &Self) -> bool {
+            self.score > other.score
+        }
+
+        fn ge(&self, other: &Self) -> bool {
+            self.score >= other.score
+        }
+    }
+
+    // Fn, FnMut, FnOnce,
+    // dyn trait lifetime
 }
 
 
