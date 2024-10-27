@@ -1,7 +1,27 @@
+use std::fmt::Debug;
+
+/// Generic Type define in `enum`
+enum Error<I, E> {
+    SYSTEM_ERROR(I, E)
+}
+
+/// Generic Type define in `method` or `function`
+fn max_value<T: PartialOrd>(arr: &[T]) -> &T {
+    let mut max_value = &arr[0];
+    for value in arr.iter() {
+        if max_value < value {
+            max_value = value;
+        }
+    }
+    &max_value
+}
+
+/// Generic Type define in `struct`
 struct Wrapper<T> {
     value: T,
 }
 
+/// Notice: impl<T> is declared
 impl<T> Wrapper<T> {
     pub fn new(value: T) -> Self {
         Wrapper { value }
@@ -14,10 +34,22 @@ impl Wrapper<isize> {
     }
 }
 
+/// const Generic Type (since Rust 1.51)
+// `const N: usize` is a generic type limit for array. (Since Rust 1.51)
+fn print_array<T: std::fmt::Debug, const N: usize>(arr: &[T; N]) {
+    println!("{:?}", arr);
+}
+
+/// const function
+const fn add(a: usize, b: usize) -> usize {
+    a + b
+}
+const RESULT: usize = add(5, 10);
+
 #[cfg(test)]
 #[allow(unused, dead_code)]
 pub mod generic_types_test_cases {
-    use crate::Wrapper;
+    use crate::{print, Wrapper};
 
     ///
     #[test]
@@ -32,7 +64,9 @@ pub mod generic_types_test_cases {
     /// generic types bound
     #[test]
     pub fn test_generic_types2() {
-
+        let arr = [1, 2, 3, 4, 5];
+        let max = print(&arr);
+        println!("{:?}", max);
     }
 }
 

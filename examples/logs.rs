@@ -118,8 +118,6 @@ pub mod logs_test_cases {
         if cfg!(debug_assertions) {
             eprintln!("this operation[`eprintln!`] is redirect stderr to stdout");
         }
-
-
     }
 
     /// Tracing got three concepts: SPAN, EVENT, COLLECTOR
