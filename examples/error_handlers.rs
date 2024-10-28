@@ -25,6 +25,18 @@ pub mod error_handlers_test_cases {
 
     use crate::Response;
 
+    /// Rust Doc: https://course.rs/basic/result-error/panic.html
+    #[test]
+    #[should_panic]
+    fn test_panic(){
+        let err = r#"
+            Test panic!!!
+            1. RUST_BACKTRACE=1 cargo run for Linux/MacOS.
+            2. $env:RUST_BACKTRACE=1; cargo run for Windows.
+        "#;
+        panic!("{}", err);
+    }
+
     /// Result
     #[test]
     pub fn test_error_handlers1() {
