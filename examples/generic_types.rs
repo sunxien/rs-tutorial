@@ -6,6 +6,20 @@ enum Error<I, E> {
 }
 
 /// Generic Type define in `method` or `function`
+/// Best Practice: return reference of T
+fn largest<T: PartialOrd + Copy>(arr: &[T]) -> T {
+    // As T is not impl Copy trait, so it occurs error
+    // cannot move out of type [T], a non-copy slice
+    let mut max = arr[0];
+    for &value in arr.iter() {
+        if max < value {
+            max = value;
+        }
+    }
+    max
+}
+
+/// Generic Type define in `method` or `function`
 fn max_value<T: PartialOrd>(arr: &[T]) -> &T {
     let mut max_value = &arr[0];
     for value in arr.iter() {

@@ -1,5 +1,7 @@
 extern crate core;
 
+use std::fmt::Display;
+use rand::random;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
@@ -24,11 +26,12 @@ struct SystemError<'a> {
     message: &'a str,
 }
 
+/// define trait
 pub trait Summary {
     fn summarize(&self) -> String;
 }
 
-struct Weibo {
+pub struct Weibo {
     username: String,
 }
 impl Summary for Weibo {
@@ -37,13 +40,49 @@ impl Summary for Weibo {
     }
 }
 
-struct Post {
+pub struct Post {
     author: String,
 }
 impl Summary for Post {
     fn summarize(&self) -> String {
         format!("this is post... author: {}", self.author)
     }
+}
+
+/// trait as parameter
+#[allow(dead_code, unused)]
+fn notify(s: &impl Summary) {
+    // FIXME Why IDEA not assist `s.summarize()`?
+    let result = s.summarize();
+    println!("{:?}", s.summarize());
+}
+
+/// trait as a generic type limit
+#[allow(dead_code, unused)]
+fn publish<T: Summary>(s: &T) {
+    let result = s.summarize();
+    println!("{:?}", s.summarize());
+}
+
+/// Same definitions like below...
+pub fn notify1(item: &(impl Summary + Display)) {}
+pub fn notify2<T: Summary + Display>(item: &T) {}
+
+/// trait as return type
+/// Compile Error: error[E0308]: `if` and `else` have incompatible types
+/// TODO How to resolve this problem? Use trait object?
+#[allow(unused, dead_code)]
+fn return_trait() -> impl Summary {
+    let rand: u8 = random();
+    // if rand & 1 == 0 {
+    Weibo {
+        username: String::from("Eric")
+    }
+    // } else {
+    //     Post {
+    //         author: String::from("xien.sxe")
+    //     }
+    // }
 }
 
 #[cfg(test)]
@@ -54,7 +93,7 @@ pub mod traits_test_cases {
     use std::fmt::{Debug, Display, Formatter};
     use serde::Serialize;
     use serde_json::{json, Serializer};
-    use crate::{DebugEmployee, DisplayEmployee, Employee, SystemError};
+    use crate::{DebugEmployee, DisplayEmployee, Employee, return_trait, SystemError};
 
     /// Other marker traits like: Send, Sync
 
@@ -126,6 +165,7 @@ pub mod traits_test_cases {
     pub fn test_from_trait() {
         // TODO
         println!();
+        return_trait();
     }
 
     /// Trait `Eq` and `PartialEq`
@@ -282,8 +322,10 @@ pub mod traits_test_cases {
     ///
     #[test]
     pub fn test_drop() {
-        let emp = Employee { emp_id: 121001, emp_name: "xien.sxe" };
-        println!("{:?}", emp);
+        {
+            let emp = Employee { emp_id: 121001, emp_name: "xien.sxe" };
+            println!("{:?}", emp);
+        } // `drop` happened end of this scope!
 
         let a = 1i32;
         let b = 2u64;
