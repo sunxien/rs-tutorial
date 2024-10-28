@@ -5,9 +5,12 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use futures::executor::ThreadPoolBuilder;
+#[allow(dead_code, unused)]
 use futures::task::SpawnExt;
 
-///
+pub use crate::module3::module3_submodule1;
+
+#[allow(dead_code, unused)]
 pub fn handle_http_stream(mut stream: TcpStream) {
     // let mut buffer = String::new();
     // let read = stream.read_to_string(&mut buffer);
@@ -52,8 +55,8 @@ pub fn handle_http_stream(mut stream: TcpStream) {
     stream.flush().unwrap();
 }
 
-#[allow(dead_code, unused)]
 /// Demo 1. WebServer (single thread)
+#[allow(dead_code, unused)]
 pub fn start_webserver_single_thread() {
     let host = "127.0.0.1:8080";
     // WARN: it's not tokio::net::TcpListener
@@ -67,6 +70,7 @@ pub fn start_webserver_single_thread() {
 }
 
 /// Demo 2. WebServer (multi threads)
+#[allow(dead_code, unused)]
 pub fn start_webserver_multi_threads() {
     let host = "127.0.0.1:8080";
     // WARN: it's not tokio::net::TcpListener
@@ -82,6 +86,7 @@ pub fn start_webserver_multi_threads() {
 }
 
 /// Demo 3. WebServer (thread pool)
+#[allow(dead_code, unused)]
 pub fn start_webserver_thread_pool() {
     let host = "127.0.0.1:8080";
     let mut builder = ThreadPoolBuilder::new();
@@ -96,10 +101,24 @@ pub fn start_webserver_thread_pool() {
     }
 }
 
+mod module1;
+mod module2;
+mod module3;
+
+fn define_multi_modules() {
+    module1::print();
+    module2::print();
+    module3::print();
+    module3_submodule1::m3s1::print_m3s1();
+}
+
 #[allow(dead_code, unused)]
 fn main() {
+
+    // define_multi_modules();
+
     // start_webserver_single_thread();
     // start_webserver_multi_threads();
-    start_webserver_thread_pool();
+    // start_webserver_thread_pool();
 }
 
