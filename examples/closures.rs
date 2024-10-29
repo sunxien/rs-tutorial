@@ -159,12 +159,27 @@ pub mod closures_test_cases {
     #[test]
     fn test_fnmut_closure() {
         let mut empty = String::new();
-        let closure_expr = |arg| empty.push_str(arg);
+
         // Compile error: calling `closure_expr` requires mutable binding due to mutable borrow of `empty`
-        // let mut closure = ....
-        closure_expr("hello closure");
-        println!("[test_fnmut_closure] result: {:?}", empty);
+        let mut closure_expr1 = |arg| empty.push_str(arg);
+
+        // Solution 1: let mut closure = ....
+        closure_expr1("hello closure_expr1");
+        println!("[test_fnmut_closure] closure_expr1 result: {:?}", empty);
+
+        // Compile error: `impl Trait` is not allowed in the type of variable bindings
+        // let closure_expr2: impl FnMut(&str) = |arg| empty.push_str(arg);
+        // closure_expr2("hello closure_expr2");
+        fnmut_update(|arg| empty.push_str(arg), " hello closure_expr2");
+        println!("[test_fnmut_closure] closure_expr2 result: {:?}", empty);
     }
+    /// Input `c:C` has moved into function, and it has not impl `Copy` trait,
+    /// why it runs more than one times? Rust Doc: https://course.rs/advance/functional-programing/closure.html#move-%E5%92%8C-fn
+    fn fnmut_update<C: FnMut(&str)>(mut c: C, arg: &str) {
+        c(arg);
+        c(arg);
+    }
+
 
     /// immutable borrow, run only once
     fn check_size<C>(c: C)
@@ -185,15 +200,16 @@ pub mod closures_test_cases {
     }
 
     /// If closure's lifetime is greater than external variable's lifetime, please use `move` keyword
-    /// e.g:
     #[test]
     fn test_move_for_closure() {
         let vecs = vec![1, 2, 3, 4, 5];
         //Compile error: may outlive borrowed value `vecs`, so move ownership into thread.
         let t = thread::spawn(move || {
-            println!("{:?}", vecs);
+            println!("[test_move_for_closure] in thread: {:?}", vecs);
         });
         t.join().unwrap();
+        // Compile error: borrow of moved value: `vecs`
+        // println!("[test_move_for_closure] out thread: {:?}", vecs);
     }
 }
 
