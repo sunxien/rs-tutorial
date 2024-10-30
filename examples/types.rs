@@ -37,6 +37,8 @@ impl Add for Meters {
 #[allow(dead_code, unused)]
 #[cfg(test)]
 pub mod type_test_cases {
+    use num_derive::FromPrimitive;
+
     use crate::{Meters, Wrapper};
 
     ///
@@ -117,6 +119,62 @@ pub mod type_test_cases {
 
         let a: Box<str> = "a".try_into().unwrap();
         println!("[test_str_with_box] into: {}", a);
+    }
+
+    ///
+    #[derive(Debug, FromPrimitive)]
+    enum Letter {
+        A = 1,
+        B,
+        C,
+        D,
+    }
+    impl TryFrom<u8> for Letter {
+        type Error = (Self);
+        fn try_from(value: u8) -> Result<Self, Self::Error> {
+            match value {
+                x if x == Letter::A as u8 => Result::Ok(Letter::A),
+                x if x == Letter::B as u8 => Result::Ok(Letter::B),
+                x if x == Letter::C as u8 => Result::Ok(Letter::C),
+                x if x == Letter::D as u8 => Result::Ok(Letter::D),
+                _ => panic!("unknown value: {}", value)
+            }
+        }
+    }
+    #[test]
+    pub fn test_enum_to_number() {
+        let a = Letter::A as u8;
+        println!("[test_enum_to_number] a: {}", a);
+        let b = Letter::B as u8;
+        println!("[test_enum_to_number] b: {}", b);
+        let c = Letter::C as u8;
+        println!("[test_enum_to_number] c: {}", c);
+        let d = Letter::D as u8;
+        println!("[test_enum_to_number] d: {}", d);
+
+        /// Compile error: Type mismatch [E0308] expected `u8`, but found `Letter`
+        // match d {
+        /// Solution1: use third-party lib: `num-traits`, `num-derive`
+        // match num_traits::FromPrimitive::from_u8(d) {
+        /// Solution2: TryFrom + macro
+        /// match d.try_into().unwrap() {
+        /// Solution3: use custom define macro.
+        /// TODO Rust Doc: https://course.rs/advance/into-types/enum-int.html
+        /// Solution4: use `std::mem::transmute()`
+        match transmute_unsafe(d) {
+            Some(Letter::A) => println!("[test_enum_to_number] d: is Letter::A"),
+            Some(Letter::B) => println!("[test_enum_to_number] d: is Letter::B"),
+            Some(Letter::C) => println!("[test_enum_to_number] d: is Letter::C"),
+            Some(Letter::D) => println!("[test_enum_to_number] d: is Letter::D"),
+            _ => println!("[test_enum_to_number] d: is Letter::UNKNOWN"),
+        }
+    }
+    fn transmute_unsafe(val: u8) -> Option<Letter> {
+        unsafe {
+            // let l: Letter = std::mem::transmute(val);
+            // Some(l)
+            Some(std::mem::transmute(val))
+        }
     }
 }
 

@@ -13,6 +13,7 @@ edition = "2021"
 pretty_assertions = "1.4.1"
 criterion = "0.5.1"
 
+
 [[bench]]
 name = "my_benchmark"
 harness = false
@@ -36,7 +37,8 @@ tokio-tungstenite = "0.24.0" # websocket
 tonic = "0.12.3" # gRPC lib
 rocket = "0.5.1"
 futures = { version = "0.3.31", features = ["thread-pool"] } # web server
-
+num-traits = "0.2.19"
+num-derive = "0.4.2"
 
 [profile.dev]
 opt-level = 0
