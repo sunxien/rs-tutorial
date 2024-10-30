@@ -5,8 +5,8 @@
 #[cfg(test)]
 #[allow(dead_code, unused)]
 pub mod smart_pointers_test_cases {
-    use std::fmt::{Display, Formatter};
-
+    use std::fmt::{Display, Formatter, Pointer};
+    use std::ops::Deref;
     use rocket::yansi::Paint;
 
     /// stack size in main thread: 8MB, others 2MB
@@ -70,6 +70,104 @@ pub mod smart_pointers_test_cases {
         println!("[test_for_linked_list] linkedlist: {}", n3);
     }
 
+    /// for trait object
+    pub trait Draw {
+        fn draw(&self);
+    }
+    struct Select {}
+    impl Draw for Select {
+        fn draw(&self) {
+            println!("[test_for_trait_object] drawing select ...")
+        }
+    }
+    struct Button {}
+    impl Draw for Button {
+        fn draw(&self) {
+            println!("[test_for_trait_object] drawing button ...")
+        }
+    }
+    #[test]
+    pub fn test_for_trait_object() {
+        // compile error: error[E0308]: mismatched types
+        // let draws: [dyn Draw; 2] = [Button {}, Select {}];
+        let draws: [Box<dyn Draw>; 2] = [Box::new(Button {}), Box::new(Select {})];
+        for draw in draws {
+            draw.draw();
+        }
+
+        let draws: Vec<Box<dyn Draw>> = vec![Box::new(Button {}), Box::new(Select {})];
+        for draw in draws {
+            draw.draw();
+        }
+    }
+
+    /// change Box<String> to &'static str
+    /// Rust Doc: https://course.rs/advance/smart-pointer/box.html
+    #[test]
+    pub fn test_box_leak() {
+        let s = Box::new("box leak".to_string());
+        let box_leak = Box::leak(s.into_boxed_str());
+        println!("[test_box_leak] leak into_boxed_str: {}", box_leak);
+    }
+
+    /// Rust Doc: https://course.rs/advance/smart-pointer/deref.html
+    struct MyBox<T> (T);
+    impl<T> MyBox<T> {
+        pub fn new(value: T) -> Self {
+            MyBox(value)
+        }
+    }
+    impl<T> Pointer for MyBox<T> {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{:p}", self.deref())
+        }
+    }
+    impl<T> Deref for MyBox<T> {
+        type Target = (T);
+        fn deref(&self) -> &Self::Target {
+            &self.0
+        }
+    }
+    #[test]
+    pub fn test_deref() {
+        let x = 123;
+        let y = &x;
+        // Compile error: `i32` does not implement `Pointer` (required by `{:p}`) [E0277]
+        // println!("[test_deref] value:{}, ptr: {:p}", x, x);
+        println!("[test_deref] value:{}, ptr: {:p}", y, y);
+
+        let one = Box::new(1);
+        let one_deref = *one + 1; // auto deref
+        println!("[test_deref] value:{}, ptr: {:p}", one_deref, one);
+
+        let mb = MyBox::new(13);
+        let mb_deref = *mb + 21;
+        println!("[test_deref] value:{}, ptr: {:p}", mb_deref, mb);
+        // println!("[test_deref] ");
+        // println!("[test_deref] ");
+        // println!("[test_deref] ");
+    }
+
+    /// Drop
+    /// Copy and Drop are conflict!!! Rust Doc: https://course.rs/advance/smart-pointer/drop.html
+    struct Foo {}
+    impl Drop for Foo {
+        fn drop(&mut self) {
+            println!("[test_drop] dropping foo now....");
+        }
+    }
+    #[test]
+    pub fn test_drop() {
+        let f = Foo {};
+        // f.drop(); // compile error: Explicit calls to `drop` are forbidden. Use `std::mem::drop` instead. [E0040]
+        std::mem::drop(f);
+        // only move ownership, destructor finally end the scope
+    }
+
+    /// Cow: Copy on write
+    #[test]
+    pub fn test_cow() {}
+
     /// Rc: Reference count
     #[test]
     pub fn test_rc() {}
@@ -81,13 +179,11 @@ pub mod smart_pointers_test_cases {
     /// RcCell:
     #[test]
     pub fn test_rc_cell() {
-        println!()
     }
 
     /// ArcCell
     #[test]
     pub fn test_arc_cell() {
-        println!()
     }
 }
 
