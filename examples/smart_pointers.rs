@@ -7,6 +7,11 @@
 pub mod smart_pointers_test_cases {
     use std::fmt::{Display, Formatter, Pointer};
     use std::ops::Deref;
+    use std::rc::Rc;
+    use std::sync::Arc;
+    use std::thread;
+    use std::thread::{Builder, Thread};
+    use num_traits::ToPrimitive;
     use rocket::yansi::Paint;
 
     /// stack size in main thread: 8MB, others 2MB
@@ -170,21 +175,50 @@ pub mod smart_pointers_test_cases {
 
     /// Rc: Reference count
     #[test]
-    pub fn test_rc() {}
+    pub fn test_rc() {
+        let s = String::from("hello world");
+        let a = Box::new(s);
+        // let b = Box::new(s); // compile error: Value used after being moved [E0382]
+
+        let a = Rc::new(String::from("hello rust"));
+        println!("[test_rc] strong count `a`: {}", Rc::strong_count(&a));
+        let b = Rc::clone(&a); // this is shallow copy. same with `a.clone()`
+        println!("[test_rc] strong count `a`: {}, `b`: {}", Rc::strong_count(&a), Rc::strong_count(&b));
+        {
+            let c = Rc::clone(&b);
+            println!("[test_rc] strong count `a`: {}, `b`: {}, `c`: {}", Rc::strong_count(&a), Rc::strong_count(&b), Rc::strong_count(&c));
+        }
+        println!("[test_rc] strong count `a`: {}, `b`: {}", Rc::strong_count(&a), Rc::strong_count(&b));
+    }
 
     /// Arc: Atomic reference count
     #[test]
-    pub fn test_arc() {}
+    pub fn test_arc() {
+        // let mut i = 1; // borrowed outlive
+        // let mut i = Rc::new(1); // compile error: `Rc<i32>` cannot be sent between threads safely
+        // let mut i = Arc::new(1);
+        // let mut threads = Vec::new();
+        // for k in '1'..='8' {
+        //     let mut prefix: String = "thread-".into();
+        //     prefix.push(k);
+        //     let t = thread::Builder::new().name(prefix).spawn(|| {
+        //         i = (i.deref() + 1).into();
+        //         println!("Current thread: {}", thread::current().name().unwrap());
+        //     }).unwrap();
+        //     threads.push(t);
+        // }
+        // for t in threads {
+        //     t.join().unwrap();
+        // }
+    }
 
     /// RcCell:
     #[test]
-    pub fn test_rc_cell() {
-    }
+    pub fn test_rc_cell() {}
 
     /// ArcCell
     #[test]
-    pub fn test_arc_cell() {
-    }
+    pub fn test_arc_cell() {}
 }
 
 /// No `main` function found in crate `smart_pointers` [EO601]
