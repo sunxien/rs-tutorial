@@ -285,6 +285,7 @@ pub mod smart_pointers_test_cases {
         let b = c2.borrow_mut().add(1025);
         println!("[test_rc_with_ref_cell] ref count: {:?}, ref count: {:?}, add: {:?}", //
                  Rc::strong_count(&c1), Rc::strong_count(&c2), b);
+        // Rc::weak_count()
     }
 }
 
