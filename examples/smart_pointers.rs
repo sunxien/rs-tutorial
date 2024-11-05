@@ -5,12 +5,13 @@
 #[cfg(test)]
 #[allow(dead_code, unused)]
 pub mod smart_pointers_test_cases {
+    use std::cell::{Cell, RefCell};
     use std::fmt::{Display, Formatter, Pointer};
-    use std::ops::Deref;
+    use std::ops::{Add, Deref};
     use std::rc::Rc;
     use std::sync::Arc;
     use std::thread;
-    use std::thread::{Builder, Thread};
+    use std::thread::{Builder, JoinHandle, Thread};
     use num_traits::ToPrimitive;
     use rocket::yansi::Paint;
 
@@ -194,31 +195,97 @@ pub mod smart_pointers_test_cases {
     /// Arc: Atomic reference count
     #[test]
     pub fn test_arc() {
-        // let mut i = 1; // borrowed outlive
-        // let mut i = Rc::new(1); // compile error: `Rc<i32>` cannot be sent between threads safely
-        // let mut i = Arc::new(1);
+        // let rc = Rc::new(String::from("hello rust"));
+        // Compile error: F: Send + 'static is required by `move ||` closure!!!
+        // let t = thread::spawn(move || {
+        //     println!("Rc value: {:?}", rc);
+        // });
+        // t.join().unwrap();
+
+        let arc = Arc::new(String::from("hello rust"));
+        let t = thread::spawn(move || {
+            println!("[test_arc] Rc value: {:?}", arc);
+        });
+        t.join().unwrap();
+    }
+
+    /// Cell: https://course.rs/advance/smart-pointer/cell-refcell.html
+    /// `Cell` is used for value which implement by `T: Copy`
+    #[test]
+    pub fn test_cell() {
+        let mut cell = Cell::new(1);
+        let mut v = cell.take();
+        v = v + 1;
+        cell.set(v);
+        println!("[test_cell] Cell value: {:?}", cell);
+    }
+
+    /// RefCell: https://course.rs/advance/smart-pointer/cell-refcell.html
+    /// `RefCell` is used for reference which implement by `T: Send + 'static`
+    #[test]
+    pub fn test_ref_cell() {
+        // let value = 1;
+        // let mut refCell = RefCell::new(&value);
         // let mut threads = Vec::new();
-        // for k in '1'..='8' {
-        //     let mut prefix: String = "thread-".into();
-        //     prefix.push(k);
-        //     let t = thread::Builder::new().name(prefix).spawn(|| {
-        //         i = (i.deref() + 1).into();
-        //         println!("Current thread: {}", thread::current().name().unwrap());
-        //     }).unwrap();
+        // for i in 1..=5 {
+        //     let t = thread::spawn(|| {
+        //         let mut v = refCell.borrow_mut();
+        //         let r = v.add(1); // let
+        //     });
         //     threads.push(t);
         // }
         // for t in threads {
         //     t.join().unwrap();
         // }
+        // println!("[test_ref_cell] RefCell value: {:?}", refCell);
     }
 
-    /// RcCell:
-    #[test]
-    pub fn test_rc_cell() {}
+    /// trait define external
+    pub trait Messager {
+        fn send(&self, message: String);
+    }
 
-    /// ArcCell
+    /// implement define internal
+    pub struct MessageQueue {
+        // bufferCache: Vec<String>
+        bufferCache: RefCell<Vec<String>>,
+    }
+
+    impl MessageQueue {
+        fn new(capacity: u32) -> Self {
+            MessageQueue { bufferCache: RefCell::new(Vec::new()) }
+        }
+    }
+
+    impl Messager for MessageQueue {
+        fn send(&self, message: String) {
+            // Compile error: Cannot borrow immutable local variable `self.bufferCache` as mutable
+            // self.bufferCache.push(message);
+
+            // Runtime error: cannot borrow data in dereference of `std::cell::Ref<'_, Vec<std::string::String>>` as mutable
+            // self.bufferCache.borrow().push(message);
+
+            self.bufferCache.borrow_mut().push(message);
+        }
+    }
+
+    ///
     #[test]
-    pub fn test_arc_cell() {}
+    pub fn test_ref_cell_for_mq() {
+        let mq = MessageQueue::new(4);
+        mq.send("hello mq".to_string());
+    }
+
+    ///
+    #[test]
+    pub fn test_rc_with_ref_cell() {
+        let rc = Rc::new(RefCell::new(1));
+        let c1 = rc.clone();
+        let c2 = rc.clone();
+        let b = c2.borrow_mut().add(1025);
+        println!("[test_rc_with_ref_cell] ref count: {:?}, ref count: {:?}, add: {:?}", //
+                 Rc::strong_count(&c1), Rc::strong_count(&c2), b);
+    }
 }
 
 /// No `main` function found in crate `smart_pointers` [EO601]
