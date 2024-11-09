@@ -1,12 +1,15 @@
 #[cfg(test)]
 #[allow(dead_code, unused)]
 pub mod threads_test_cases {
+    use std::ops::Sub;
     use std::sync::{Arc, Barrier, Condvar, mpsc, Mutex, RwLock};
+    use std::sync::atomic::{AtomicU64, Ordering};
     use std::thread;
     use std::thread::{Builder, JoinHandle, sleep};
     use std::time::Duration;
 
     use lazy_static::lazy_static;
+    use tokio::time::Instant;
 
     /// 1. thread::spawn
     /// 2. join().unwrap()
@@ -312,9 +315,33 @@ pub mod threads_test_cases {
         // }
     }
 
-    ///
+    /// Atomic is always used as Global Variable
+    /// Rust Doc: https://course.rs/advance/concurrency-with-threads/sync2.html
+    const N_TIMES: u64 = 10000000; // declare const must with type
+    const N_THREADS: u8 = 8;
+    static R: AtomicU64 = AtomicU64::new(0);
+    // What's the difference between `const` and `static`?
+    fn add_n_times(n: u64) -> JoinHandle<()> {
+        thread::spawn(move || {
+            for _ in 1..=n {
+                R.fetch_add(1, Ordering::Relaxed);
+            }
+        })
+    }
     #[test]
-    pub fn test_atomic() {}
+    pub fn test_atomic() {
+        let begin = Instant::now();
+        let mut handlers = Vec::new();
+        for _ in 1..=N_THREADS {
+            handlers.push(add_n_times(N_TIMES));
+        }
+        for handle in handlers {
+            handle.join().unwrap();
+        }
+        let result = R.load(Ordering::Relaxed);
+        let elapsed = Instant::now().sub(begin);
+        println!("[test_atomic] final result: {:?}. Elapsed: {:?}", result, elapsed);
+    }
 
     ///
     #[test]
