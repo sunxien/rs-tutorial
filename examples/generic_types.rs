@@ -60,6 +60,8 @@ const fn add(a: usize, b: usize) -> usize {
 }
 const RESULT: usize = add(5, 10);
 
+/// Rust Doc: https://course.rs/basic/trait/generic.html#%E6%B3%9B%E5%9E%8B-generics
+/// struct, enum, func, const
 #[cfg(test)]
 #[allow(unused, dead_code)]
 pub mod generic_types_test_cases {
@@ -81,6 +83,11 @@ pub mod generic_types_test_cases {
         let arr = [1, 2, 3, 4, 5];
         let max = max_value(&arr);
         println!("{:?}", max);
+    }
+
+    ///
+    fn length<T: ?Sized, const N: usize>(arr: [T; N]) -> usize {
+        N
     }
 }
 

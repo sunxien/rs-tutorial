@@ -1,6 +1,10 @@
 use std::fmt::Debug;
+use std::sync::OnceLock;
 use std::thread::sleep;
 use std::time::Duration;
+
+use log::info;
+use rocket::shield::Prefetch::On;
 use serde::{Deserialize, Serialize};
 use tracing::{event, instrument, Level, span};
 use tracing_subscriber::fmt;
@@ -67,10 +71,14 @@ pub fn call_grandson() {
 #[allow(dead_code, unused)]
 #[cfg(test)]
 pub mod logs_test_cases {
+    use std::cell::OnceCell;
+    use std::collections::HashMap;
     use std::env;
+    use std::sync::OnceLock;
 
-    use env_logger::{Builder, Env, Target};
-    use log::{debug, error, info, Level, log, log_enabled, trace, warn};
+    use env_logger::{Builder, Env, Logger, Target};
+    use lazy_static::lazy_static;
+    use log::{debug, error, info, Level, log, Log, log_enabled, logger, trace, warn};
     use log::Level::{Debug, Trace};
     use tracing::{event, info_span, span};
     use tracing_subscriber::fmt;
@@ -158,6 +166,40 @@ pub mod logs_test_cases {
 
         // TODO File Appender Doc: https://github.com/tokio-rs/tracing/tree/master/tracing-appender
     }
+
+    // Runtime error: `OnceCell<Logger>` cannot be shared between threads safely
+    // static GLOBAL_LOG: OnceCell<Logger> = OnceCell::new(); // single-thread
+    static GLOBAL_LOG: OnceLock<Box<&str>> = OnceLock::new(); // multi-thread
+    struct LoggerFactory;
+    impl LoggerFactory {
+        pub fn init() {
+            GLOBAL_LOG.get_or_init(|| {
+                println!("env_logger::init() ....");
+                Box::new("")
+            });
+        }
+    }
+    #[test]
+    pub fn test_logger_factory() {
+        let logger = LoggerFactory::init();
+        let logger = LoggerFactory::init();
+    }
+
+
+    /// Define global variable: lazy_static!, Box::leak(..)
+    lazy_static! {
+        static ref INNER_CACHE: HashMap<i32, &'static str> = {
+            let mut m = HashMap::new();
+            m.insert(1, "one");
+            m.insert(2, "two");
+            m.insert(3, "three");
+            m
+        };
+    }
+    #[test]
+    pub fn test_lazy_static() {
+        println!("1: {:?}", INNER_CACHE.get(&1));
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -167,4 +209,5 @@ struct Emp<'a> {
 }
 
 /// No `main` function found in crate `logs` [EO601]
-fn main() {}
+fn main() {
+}

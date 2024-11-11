@@ -1,6 +1,7 @@
 extern crate core;
 
 use std::fmt::Display;
+
 use rand::random;
 use serde::{Deserialize, Serialize};
 
@@ -91,8 +92,7 @@ pub mod traits_test_cases {
     use std::cmp::Ordering;
     use std::error::Error;
     use std::fmt::{Debug, Display, Formatter};
-    use serde::Serialize;
-    use serde_json::{json, Serializer};
+
     use crate::{DebugEmployee, DisplayEmployee, Employee, return_trait, SystemError};
 
     /// Other marker traits like: Send, Sync
@@ -337,6 +337,18 @@ pub mod traits_test_cases {
         fn drop(&mut self) {
             println!("drop employee object now....");
         }
+    }
+
+    /// Rust Doc: https://course.rs/advance/into-types/sized.html
+    fn length<T: ?Sized>(arr: &T) -> usize {
+        size_of_val(arr)
+    }
+    #[test]
+    fn test_unfixed_length() {
+        println!("arr {:?}", length(&6));
+        println!("arr {:?}", length("abc"));
+        let arr: [i32; 3] = [1, 2, 3];
+        println!("arr {:?}", length(&arr));
     }
 }
 

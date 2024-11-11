@@ -27,14 +27,14 @@ tracing-subscriber = "0.3.18"
 tracing-appender = "0.2.3"
 serde = { version = "1.0.213", features = ["derive"] }
 serde_json = "1.0.132" # json lib
-rust-csv = "0.1.0"
+#rust-csv = "0.1.0"
 criterion = "0.5.1"
-sqlx = "0.8.2" # sql client
-redis_rs = "0.9.0" # redis client
-rayon = "1.10.0" # for CPU task
-tokio = "1.41.0" # async lib for IO task
-tokio-tungstenite = "0.24.0" # websocket
-tonic = "0.12.3" # gRPC lib
+#sqlx = "0.8.2" # sql client
+#redis_rs = "0.9.0" # redis client
+#rayon = "1.10.0" # for CPU task
+#tokio = "1.41.0" # async lib for IO task
+#tokio-tungstenite = "0.24.0" # websocket
+#tonic = "0.12.3" # gRPC lib
 rocket = "0.5.1"
 futures = { version = "0.3.31", features = ["thread-pool"] } # web server
 num-traits = "0.2.19"
@@ -55,6 +55,9 @@ incremental = true
 codegen-units = 256
 rpath = false
 
+[profile.test]
+opt-level = 2
+
 [profile.release]
 opt-level = 3
 debug = false
@@ -62,7 +65,7 @@ split-debuginfo = '...'  # Platform-specific.
 debug-assertions = false
 overflow-checks = false
 lto = false
-panic = 'unwind'
+panic = 'unwind' # or 'abort'
 incremental = false
 codegen-units = 16
 rpath = false
