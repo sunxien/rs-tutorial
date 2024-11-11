@@ -85,11 +85,48 @@ pub mod generic_types_test_cases {
         println!("{:?}", max);
     }
 
-    ///
-    fn length<T: ?Sized, const N: usize>(arr: [T; N]) -> usize {
+    /// 1. generic type: func, struct, enum
+    /// 2. generic type: const N, const expr, const fn
+    /// 3. generic type: as parameter:
+    /// Compile error: doesn't have a size known at compile-time
+    fn length<T: Sized, const N: usize>(arr: [T; N]) -> usize {
         N
+        // `T: Sized`, it can't be defined as `T:?Sized`
+        // Compile error: doesn't have a size known at compile-time
+    }
+    #[derive(Debug)]
+    struct Buffer<T, const N: usize> {
+        data: [T; N],
+    }
+    const fn static_length_of(factor: usize) -> usize {
+        factor * 4
+    }
+    #[test]
+    pub fn test_dyn_arr_length() {
+        let arr: [i32; 3] = [12, 33, 21];
+        println!("arr: {}", length(arr));
+
+        //...
+        const SIZE: usize = static_length_of(2);
+        let buf = Buffer::<i32, SIZE> { data: [-1; SIZE] };
+        println!("const fn + const generic type: {:?}", buf);
+    }
+}
+
+#[derive(Debug)]
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Point<T> {
+    fn x(&self) -> &T {
+        &self.x
     }
 }
 
 /// No `main` function found in crate `generic_types` [EO601]
-fn main() {}
+fn main() {
+    let p = Point { x: Point { x: 5, y: 10 }, y: Point { x: 5, y: 10 } };
+    println!("p.x = {:?}", p.x());
+}

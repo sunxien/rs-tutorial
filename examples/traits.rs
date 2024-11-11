@@ -1,7 +1,10 @@
 extern crate core;
 
+use std::{env, thread};
 use std::fmt::Display;
+use std::sync::OnceLock;
 
+use log::{debug, info};
 use rand::random;
 use serde::{Deserialize, Serialize};
 
@@ -86,6 +89,10 @@ fn return_trait() -> impl Summary {
     // }
 }
 
+/// Rust Doc: https://course.rs/basic/trait/trait.html
+/// 1. trait used for impl functions
+/// 2. trait used for parameters; e.g: fn test(arg: &impl trait)
+/// 3. trait used for return type
 #[cfg(test)]
 #[allow(unused, dead_code)]
 pub mod traits_test_cases {
@@ -352,6 +359,58 @@ pub mod traits_test_cases {
     }
 }
 
+pub trait ILogger<'a> {
+    fn info(&self, message: &'a str);
+    fn debug(&self, pattern: &'a str, args: &'a str);
+}
+struct Logger;
+impl Logger {
+    fn new() -> Self {
+        Logger {}
+    }
+}
+impl<'a> ILogger<'a> for Logger {
+    fn info(&self, message: &'a str) {
+        info!("嘿嘿，瞧你打印的信息：{}", message);
+    }
+
+    fn debug(&self, pattern: &'a str, args: &'a str) {
+        debug!("嘿嘿，瞧你打印的信息：{} {}" ,pattern, args);
+    }
+}
+// `impl Trait` is only allowed in arguments and return types of functions and methods
+static GLOBAL: OnceLock<Logger> = OnceLock::new();
+struct LoggerFactory;
+impl<'a> LoggerFactory {
+    // pub fn new() -> &'a Logger {
+    pub fn new() -> &'a impl ILogger<'a> {
+        GLOBAL.get_or_init(||{
+            unsafe { env::set_var("RUST_LOG", "trace"); }
+            env_logger::init();
+            println!("env_logger::init()....");
+            Logger::new()
+        })
+    }
+}
 
 /// No `main` function found in crate `traits` [EO601]
-fn main() {}
+fn main() {
+    let logger = LoggerFactory::new();
+    let logger = LoggerFactory::new();
+    let logger = LoggerFactory::new();
+    let logger = LoggerFactory::new();
+    let logger = LoggerFactory::new();
+    logger.info("2024年11月11日，某第三方支付公司发生在线交易故障！！！");
+
+    let mut threads = Vec::new();
+    for _ in 1..=5 {
+        let thread = thread::spawn(|| {
+            let logger = LoggerFactory::new();
+            logger.info("2024年11月11日，某第三方支付公司发生重大交易故障！！！");
+        });
+        threads.push(thread);
+    }
+    for thread in threads {
+        thread.join().unwrap();
+    }
+}
