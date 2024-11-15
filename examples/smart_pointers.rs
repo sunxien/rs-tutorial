@@ -247,13 +247,13 @@ pub mod smart_pointers_test_cases {
 
     /// implement define internal
     pub struct MessageQueue {
-        // bufferCache: Vec<String>
-        bufferCache: RefCell<Vec<String>>,
+        // buffer_cache: Vec<String>
+        buffer_cache: RefCell<Vec<String>>,
     }
 
     impl MessageQueue {
         fn new(capacity: u32) -> Self {
-            MessageQueue { bufferCache: RefCell::new(Vec::new()) }
+            MessageQueue { buffer_cache: RefCell::new(Vec::new()) }
         }
     }
 
@@ -265,7 +265,7 @@ pub mod smart_pointers_test_cases {
             // Runtime error: cannot borrow data in dereference of `std::cell::Ref<'_, Vec<std::string::String>>` as mutable
             // self.bufferCache.borrow().push(message);
 
-            self.bufferCache.borrow_mut().push(message);
+            self.buffer_cache.borrow_mut().push(message);
         }
     }
 
@@ -287,6 +287,67 @@ pub mod smart_pointers_test_cases {
                  Rc::strong_count(&c1), Rc::strong_count(&c2), b);
         // Rc::weak_count()
     }
+
+    /// cycle reference
+    #[test]
+    pub fn test_cycle_reference() {}
+
+    /// self reference
+    struct SelfRef<'a> {
+        value: String,
+        ptr: &'a str,
+    }
+    #[test]
+    pub fn test_self_reference() {
+        // let s = String::from("hi");
+        // let self_ref = SelfRef {
+        //     value: s,
+        //     ptr: &s, // compile error: Value used after being moved [E0382]
+        // };
+        // compile error: Value used after being moved [E0382]
+        // Solution 1: Option
+        // Solution 2: unsafe + raw pointer
+        // Solution 3: Pin
+    }
+    #[test]
+    pub fn test_self_reference_with_option() {}
+    struct UnsafeSelfRef {
+        value: String,
+        ptr: *const String, // or change to *mut String
+    }
+    impl UnsafeSelfRef {
+        pub fn new(val: &str) -> Self {
+            UnsafeSelfRef {
+                value: val.to_string(),
+                ptr: std::ptr::null(), // *const T
+            }
+        }
+        pub fn init(&mut self) {
+            // what does *const String mean???
+            // Rust Doc: https://doc.rust-lang.net.cn/stable/reference/types/pointer.html
+            let self_ref: *const String = &self.value; // change to &mut self.value;
+            self.ptr = self_ref;
+        }
+        pub fn value(&self) -> &str {
+            &self.value
+        }
+        pub fn value_of_ptr(&self) -> &str {
+            if self.ptr.is_null() {
+            // if self.ptr == std::ptr::null() {
+                panic!("NPE!!! Please init firstly");
+            }
+            unsafe { &*(self.ptr) }
+        }
+    }
+    #[test]
+    pub fn test_self_reference_with_unsafe() {
+        let mut usr = UnsafeSelfRef::new("hi");
+        // usr.value_of_ptr();
+        usr.init();
+        println!("value:{:?}, value_of_ptr:{:?}", usr.value(), usr.value_of_ptr());
+    }
+    #[test]
+    pub fn test_self_reference_with_pin() {}
 }
 
 /// No `main` function found in crate `smart_pointers` [EO601]
