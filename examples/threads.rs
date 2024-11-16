@@ -6,7 +6,7 @@ pub mod threads_test_cases {
     use std::sync::atomic::{AtomicU64, Ordering};
     use std::thread;
     use std::thread::{Builder, JoinHandle, sleep};
-    use std::time::Duration;
+    use std::time::{Duration, Instant};
 
     use lazy_static::lazy_static;
     use tokio::time::Instant;

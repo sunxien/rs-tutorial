@@ -1,6 +1,7 @@
 #[cfg(test)]
 #[allow(dead_code, unused)]
 pub mod async_await_test_cases {
+    use std::rc::Rc;
     use std::thread::sleep;
     use std::time::Duration;
 
@@ -69,6 +70,54 @@ pub mod async_await_test_cases {
     #[test]
     pub fn test_call_async_methods() {
         block_on(call_async_methods());
+    }
+
+    /// Smart-Pointer, Weak Ref, Self Ref,
+    #[test]
+    pub fn test_weak_ref() {
+        let a = Rc::new(5);
+        println!("[test_weak_ref] ref of a: {:?}", Rc::strong_count(&a));
+
+        let weak_a = Rc::downgrade(&a);
+        println!("[test_weak_ref] weak_a_weak_count: {:?}, weak_a_strong_count: {:?}", weak_a.weak_count(), weak_a.strong_count());
+
+        let weak_a_opt = weak_a.upgrade();
+        println!("[test_weak_ref] before drop weak_a_opt: {:?}", weak_a_opt.unwrap());
+
+        std::mem::drop(a);
+
+        let weak_a_opt = weak_a.upgrade();
+        println!("[test_weak_ref] after drop weak_a_opt: {:?}", weak_a_opt);
+    }
+
+
+    /// Rust Doc: https://course.rs/advance/circle-self-ref/circle-reference.html
+    #[test]
+    pub fn test_cycle_reference() {
+        // TODO
+    }
+
+    /// Rust Doc: https://course.rs/advance/circle-self-ref/self-referential.html
+    #[derive(Debug)]
+    struct SelfRef<'a> {
+        val: String,
+        ptr: &'a str, // point to value
+    }
+    #[derive(Debug)]
+    struct SelfRefOpt<'a> {
+        val: String,
+        ptr: Option<&'a str>,
+    }
+    #[test]
+    pub fn test_self_reference() {
+        let val = String::from("hello");
+        // Compile error: Value used after being moved [E0382]
+        // let self_ref = SelfRef { val, ptr: val.as_str() };
+
+        // Use `Option`
+        let mut self_ref_opt = SelfRefOpt { val:"Hello".to_string(), ptr:Option::None };
+        self_ref_opt.ptr = Some(&self_ref_opt.val[..]);
+        println!("[test_self_reference] {:?}", self_ref_opt);
     }
 }
 
